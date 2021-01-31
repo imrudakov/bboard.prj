@@ -1,5 +1,9 @@
 <?php
 //todo сделать через классы ( каждом типу товаров присвоить свой класс )
+
+include_once 'database.php'; //q это заменяют на неймспейсы? todo заменить на неймспейсы
+include_once 'author.php';
+
 $names = [
     'John',
     'Oliver',
@@ -244,13 +248,26 @@ $options = [
 $database = new Database();
 $db = $database->getConnection();
 
-for ($i = 1; $i < 20; $i++) {
+
+/*for ($i = 1; $i <= 51; $i++) {
     $name = $names[rand(0, count($names) - 1)];
     $surname = $surnames[rand(0, count($surnames) - 1)];
+
+    print ($name . ' ' . $surname);
     echo '<br>';
 
-    $qurey = "INSERT INTO board_bd.ads VALUES ( )";
-}
+    //Формирование SQL запроса на добавление
+    $query = "INSERT INTO board_bd.authors VALUES (default,'$name', '$surname' )";
+    $stmt = $db->prepare($query);
+    $stmt->execute();
+
+
+    // подготовка запроса  $stmt = $db->prepare($query); //q что делает функция
+    // выполняем запрос $stmt->execute(); //q что делает функция
+
+
+}*/
+
 
 function description_gen()
 {
@@ -266,7 +283,9 @@ function randomDate($start_date, $end_date)
     return date('Y-m-d H:i:s', $val);
 }
 
-/*for ($i = 1; $i < 10; $i++) {
+echo('<br><br>');
+
+/*for ($i = 1; $i <= 101; $i++) {
 
     $good_name = $goods_names[rand(0, count($goods_names) - 1)];
     $prefix = $prefixes[rand(0, count($prefixes) - 1)];
@@ -281,19 +300,52 @@ function randomDate($start_date, $end_date)
 
     $good = $goods[$good_name][rand(0, count($goods[$good_name]))];
 
-    $author = 0;
+    // инициализируем объект
+    $author = new Author($db);
+    // запрашиваем авторов в случайном порядке и их количество
+    $stmt = $author->randread();
+    $num = $stmt->rowCount();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $author_id = $row['author_id'];
     $title = ucfirst(trim($material . ' ' . $good)); //todo сделать проверку на заполненость полей
     $description = ucfirst(trim($prefix . ' ' . $pattern . ' ' . $material . ' ' . $good));
     $price = rand(500, 10000); //todo сделать зависимость от материала и качества
     $publication_date = randomDate('01.01.2021', '29.01.2021');
 
-    echo($title . '<br>' . $description. '<br>' .$price. '<br>' .$publication_date);
-    echo('<br><br>');
+    if ($author_id and $title and $description and $price and $publication_date) {
+
+        echo($title . '<br>' . $description . '<br>' . $price . '<br>' . $publication_date . '<br> author id: ' . $author_id);
+        echo('<br><br>');
+
+        $query = "INSERT INTO board_bd.ads VALUES (default, '$author_id','$title', '$description', '$price', '$publication_date')";
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+
+
+    };
+
 
     $prefix = null;
     $pattern = null;
     $material = null;
     $good = null;
 
-    //todo сделать генерацию автора для объявления, генерацию изображений и добавление всех данных в базу данных
+    // todo сделать генерацию автора для объявления, генерацию изображений и добавление всех данных в базу данных
+}*/
+$pk = 0; //todo переписать в генератор /I\
+for ($count=1; $count<=111; $count++){
+
+    $photo_count = rand(1,3);
+
+    for ($count2=1; $count2<=$photo_count; $count2++){
+        $link = '/images/image'.$pk;
+        $pk+=1;
+        $query = "INSERT INTO board_bd.product_photos VALUES (default, '$count','$link')";
+        print($link);
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+        echo('<br>');
+    }
+    echo('<br>');
 }

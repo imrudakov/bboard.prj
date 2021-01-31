@@ -58,5 +58,16 @@ class Ad
 
         return $stmt;
     }
+    function read_row_count(){
+        $query = "SELECT COUNT(1) FROM board_bd.ads";
+
+        // подготовка запроса
+        $stmt = $this->connection->prepare($query);
+
+        // выполняем запрос
+        $stmt->execute();
+
+        return $stmt;
+    }
 
 }
