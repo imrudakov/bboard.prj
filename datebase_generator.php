@@ -341,7 +341,7 @@ for ($count=1; $count<=111; $count++){
     for ($count2=1; $count2<=$photo_count; $count2++){
         $link = '/images/image'.$pk;
         $pk+=1;
-        $query = "INSERT INTO board_bd.product_photos VALUES (default, '$count','$link')";
+        $query = "INSERT INTO board_bd.product_photos VALUES (default, '$count','$link','$count2')";
         print($link);
         $stmt = $db->prepare($query);
         $stmt->execute();

@@ -1,7 +1,8 @@
 <?php
 // необходимые HTTP-заголовки
+//q зачем это?
 header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
+//header("Content-Type: application/json; charset=UTF-8");
 
 // use product\Product;
 
@@ -16,71 +17,106 @@ $database = new Database();
 $db = $database->getConnection();
 
 // инициализируем объект
-$product = new Ad($db);
+$ad = new Ad($db);
 
-// чтение товаров:
+//http://bboard.prj/read.php?page=1&sort_by=date&sort_direction=DESC
+//http://bboard.prj/ad?page=1&sort_by=date&sort_direction=DESC
+$current_page = $_GET['page'];
+$sort_by = $_GET['sort_by'];
+$sort_direction = $_GET['sort_direction']; //todo тут должен быть парсинг параметров из запроса;
 
-// запрашиваем товары
-$stmt = $product->read();
-$num = $stmt->rowCount();
 
-// проверка, найдено ли больше 0 записей
-if ($num>0) {
+// запрашиваем кол-во записей в базе
+$total_rows = $ad->read_rowcount();
 
-    // массив товаров
-    $products_arr=array();
-    $products_arr["records"]=array();
+//Находим сколько всего записей в таблице
 
-    // получаем содержимое нашей таблицы
-    // fetch() быстрее, чем fetchAll() q что такое флетч?
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 
-        // извлекаем строку
-        extract($row); //q расспаковывет строку как переменные?
+// Подсчет сколько всего возможно страниц
+if ($total_rows % 10 != 0) {
+    $total_page = intdiv($total_rows, 10) + 1;
+} else {
+    $total_page = $total_rows % 10;
+};
 
-        $product_item=array(
-            "id" => $id,
-            "name" => $name,
-            "description" => html_entity_decode($description),
-            "price" => $price,
-            "category_id" => $category_id,
-            "category_name" => $category_name
-        );
+if ($current_page > $total_page) {
+    print('Такой страницы не существует'); // todo заменить на return
+    die();
+} else {
+    $from = ($current_page - 1) * 10;
+}
+
+switch ($sort_by) {
+    case 'date':
+        $sort_by = 'publication_date';
+        break;
+    case 'price':
+        $sort_by = 'price';
+        break;
+};
+
+
+
+$stmt = $ad->read($from, $sort_by, $sort_direction );
+//q как писать документацию к функциям (чтобы отображалась в интелисенс)
+//q зачем результат  метода возвращать?
+
+$accept = getallheaders();
+
+if ($accept['Accept'] != 'application/json') {
+
+
+// Отдаем html
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        print ('Title: ' . $row['title'] . ' Photo link: ' . $row['link'] . ' Price: ' . $row['price']);
+        print('<br>');
+    };
+
+    print('<br>');
+    print ($current_page . ' page of ' . $total_page);
+
+}else {
+
+//Отдаем json
+
+    header("Content-Type: application/json; charset=UTF-8");
+
+    $products_arr = array();
+    $products_arr["records"] = array();
+    $products_arr["page"];
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+
+        // массив товаров
+
+
+        $product_item = [
+            'Title' => $row['title'],
+            'Photo link' => $row['link'],
+            'Price' => $row['price']
+        ];
+
 
         array_push($products_arr["records"], $product_item);
+
+
     }
 
-    // устанавливаем код ответа - 200 OK
-    http_response_code(200);
+    print ($current_page);
+    print (' ');
+    print ($total_page);
+    // q почему значение не поподает в массив
+    $products_page = [
+        'current_page' => $current_page,
+        'total_page' => $total_page
 
+    ];
 
-    // выводим данные о товаре в формате JSON
-    // echo json_encode($products_arr); // todo проверить заголовок если html то вернуть html
-    // Проверяем на заголовок
+    var_dump($products_page);
+    array_push($products_arr["page"], $products_page);
 
-    if (header("фвву") == 'application/json') {
-        echo json_encode($products_arr);
-    } else {
-        foreach ($products_arr['records'] as $product){
-
-            echo $product['id'].' '.
-                 $product['name'].' '.
-                 $product['description'].' '.
-                 $product['price'].' '.
-                 $product['category_id'].' '.
-                 $product['category_name'].PHP_EOL;
-
-        }
-    }
-} // 'товары не найдены' :
-
-// 'товары не найдены' :
-
-else {
-
-    // установим код ответа - 404 Не найдено
-    http_response_code(404);
-
-    // сообщаем пользователю, что товары не найдены
-    echo json_encode(array("message" => "Товары не найдены."), JSON_UNESCAPED_UNICODE);
+    echo json_encode($products_arr);
 }
+
+//todo Добавить обработчик ошибок
