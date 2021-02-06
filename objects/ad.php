@@ -68,7 +68,7 @@ class Ad
         return $stmt;
     }
     function create($title, $description, $link, $price , $author_id){
-        $query = "INSERT INTO board_bd.product_photos VALUES (default, '$title', '$description')";
+        $query = "INSERT INTO board_bd.ads VALUES (default, '$author_id','$title', '$description', '$price',current_date)";
 
         // подготовка запроса
         $stmt = $this->connection->prepare($query);
@@ -76,42 +76,22 @@ class Ad
         // выполняем запрос
         $stmt->execute();
 
-        return $stmt;
+        $id = $this->connection->insert_id; //q как это делаеться в интерпрайзе ? todo не работает!
+
+        $query = "INSERT INTO board_bd.product_photos VALUES (default, '$id', '$link', 1)";
+
+        // подготовка запроса
+        $stmt = $this->connection->prepare($query);
+
+        // выполняем запрос
+        $stmt->execute();
+
+        return $id;
     }
 
 
     // метод read() - получение товаров
-    function readtest()
-    {
 
-        /*
-        $query = "SELECT c.name as category_name, p.id, p.name, p.description, p.price, p.category_id, p.created
-        FROM " . $this->table_name . " as p ! LEFT JOIN categories c ! ON p.category_id = c.id ORDER BY p.created DESC";
-        q почему использовались с и p вместо полных имен?
-        q почему categories объявли не в класе? !!
-        */
-
-        // выбираем все записи
-        // q Как нужно выравнивать запрос?
-        // q как правильно? authors as authors
-
-        $query = "SELECT ads.ad_id, ads.author_id, ads.title, ads.description, ads.price, ads.publication_date
-                  FROM " . $this->table_name . " as ads 
-                  LEFT JOIN authors as authors ON ads.author_id = authors.author_id 
-                  LEFT JOIN product_photos as pp ON ads.ad_id = pp.ad_id                   
-                  ORDER BY ads.publication_date DESC";
-
-        //q можно ли как то это протестить из консоли как в питоне?
-
-
-        // подготовка запроса
-        $stmt = $this->connection->prepare($query);
-
-        // выполняем запрос
-        $stmt->execute();
-
-        return $stmt;
-    }
     function read_rowcount(){
         // $stmt = $db->prepare("SELECT COUNT(1) FROM board_bd.ads"); //q Как сделать запрос сразу в ДБ
         $query = "SELECT COUNT(1) FROM board_bd.ads";
