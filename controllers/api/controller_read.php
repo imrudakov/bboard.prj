@@ -1,6 +1,6 @@
 <?php
 
-require 'models/ad_crud.php';
+require 'repository/ad_crud.php';
 
 header("Content-Type: application/json; charset=UTF-8");
 

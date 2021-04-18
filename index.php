@@ -22,7 +22,7 @@
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // address (only)
 $uri_segments = explode('/', trim($uri, '/'));
 
-$accept = getallheaders();
+//$accept = getallheaders();
 
 
 if ($accept['Accept'] == 'application/json') {
@@ -52,11 +52,11 @@ if ($accept['Accept'] == 'application/json') {
 } else {
     if ($uri_segments[0] = 'ad') {
 
-        if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+       // if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
             require 'controllers/html/controller_read.php';
 
-        }
+       // }
     }
 }
 

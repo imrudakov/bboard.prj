@@ -32,20 +32,23 @@ class Ad
     - нужна возможность сортировки: по цене (возрастание/убывание) и по дате создания (возрастание/убывание)
     - поля в ответе: название объявления, ссылка на главное фото (первое в списке), цена*/
 
-    function read($from, $sort_by, $sort_direction ){
+    function read($from, $sort_by, $sort_direction ){ //todo переименовать в ad list
+
+        if ($sort_by == null){$sort_by = '';}
+        if ($sort_direction == null){$sort_direction = '';}
 
         $query = "SELECT a.title,a.description, a.price, p0.link  FROM board_bd.ads a
                   LEFT JOIN  board_bd.product_photos p0 ON  a.ad_id = p0.ad_id where number = 1
-                  ORDER BY :sort_by :sort_direction limit :from, 10";
+                  limit :from, 10";
+                 // ORDER BY :sort_by :sort_direction limit :from 10";
 
-        //Реализация маски запроса
-        $array_in = [$sort_by, $sort_direction, $from];
-        $array_out = [':sort_by', ':sort_direction', ':from'];
-        $query = str_replace($array_out, $array_in, $query);
+
 
         $stmt = $this->connection->prepare($query);
+        $stmt->bindParam(':from', $from);
 
         // выполняем запрос
+        //$stmt->execute(array(':sort_by'=>$sort_by, ':sort_direction'=>$sort_direction, ':from'=>$from));
         $stmt->execute();
 
         return $stmt;//q зачем возвращать?
@@ -76,7 +79,7 @@ class Ad
         // выполняем запрос
         $stmt->execute();
 
-        $id = $this->connection->insert_id; //q как это делаеться в интерпрайзе ? todo не работает!
+        $id = $this->connection->lastInsertId(); //q как это делаеться в интерпрайзе ? todo не работает!
 
         $query = "INSERT INTO board_bd.product_photos VALUES (default, '$id', '$link', 1)";
 
@@ -88,10 +91,6 @@ class Ad
 
         return $id;
     }
-
-
-    // метод read() - получение товаров
-
     function read_rowcount(){
         // $stmt = $db->prepare("SELECT COUNT(1) FROM board_bd.ads"); //q Как сделать запрос сразу в ДБ
         $query = "SELECT COUNT(1) FROM board_bd.ads";

@@ -334,13 +334,12 @@ echo('<br><br>');
     // todo сделать генерацию автора для объявления, генерацию изображений и добавление всех данных в базу данных
 }*/
 $pk = 0; //todo переписать в генератор /I\
-for ($count=1; $count<=111; $count++){
+for ($count = 1; $count <= 111; $count++) {
+    $photo_count = rand(1, 3);
 
-    $photo_count = rand(1,3);
-
-    for ($count2=1; $count2<=$photo_count; $count2++){
-        $link = '/images/image'.$pk;
-        $pk+=1;
+    for ($count2 = 1; $count2 <= $photo_count; $count2++) {
+        $link = '/images/image' . $pk;
+        $pk += 1;
         $query = "INSERT INTO board_bd.product_photos VALUES (default, '$count','$link','$count2')";
         print($link);
         $stmt = $db->prepare($query);

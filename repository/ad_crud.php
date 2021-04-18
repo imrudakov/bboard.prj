@@ -2,7 +2,7 @@
 
 
 include_once 'core/database.php';
-include_once 'objects/ad.php';
+include_once 'repository/ad.php';
 
 class Ad_crud
 {
@@ -43,7 +43,7 @@ class Ad_crud
             $total_page = $total_rows % 10;
         };
 
-
+        if ($current_page == 0){$current_page = 1;}
         if ($current_page > $total_page) {
             print('Такой страницы не существует'); // todo заменить на return
             die();
@@ -64,7 +64,7 @@ class Ad_crud
         $stmt = $ad->read($from, $sort_by, $sort_direction);
         //q как писать документацию к функциям (чтобы отображалась в интелисенс)
         //q зачем результат  метода возвращать?
-
+       // var_dump($stmt->fetchAll());
         $products_arr = array();
         $products_arr["records"] = array();
         $products_arr["page"];
